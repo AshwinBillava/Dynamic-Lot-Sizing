@@ -18,7 +18,7 @@ stairs([0 t t(end)+1],[0 demand_cum demand_cum(end)])
 xlabel('Time');
 ylabel('Demand');
 hold on
-
+%% 
 %%% set production rate
 % q = sum(demand_cum(end))/n
 q = 5; % example 2
@@ -36,6 +36,9 @@ t = t(t_ind); % time array after zero demand event eliminated
 demand = demand(t_ind); % demand array after zero demand event eliminated
 demand_cum = demand_cum(t_ind); % cumulative demand after zero demand event eliminated
 
+disp(['Total number of demand events: ',num2str(length(demand))])
+disp(['Total number of setup decision choices: ',num2str(2^(length(demand)-1))])
+%%
 %%% find production restriction rate (PRR)
 ind = 0; %the time of the current dominated event
 kk = 0;
@@ -64,11 +67,15 @@ for j = 1:length(prod_start_t)
     %plot([prod_start_t0(j),prod_end_t(j)],[0,(prod_end_t(j)-prod_start_t0(j))*q],'g')
     plot([prod_start_t(j),prod_end_t(j)],[prod_start(j),prod_end(j)],'g')
 end
+%%
 
+disp(['Total number of demand events after PRR: ',num2str(length(D_j))])
+disp(['Total number of setup decision choices after PRR: ',num2str(2^(length(D_j)-1))])
+%%
 %%% plot updated cumulative demand curves
 t_c = prod_end_t;
 stairs([0 t_c t_c(end)+1],[0 D_bar_j D_bar_j(end)],'k-.')
-
+%%
 %%% Specify Inputs
 K = 36; % Setup-Cost
 c = 10; % Unit Production Cost
@@ -80,9 +87,9 @@ beta = 1; % begin setup cost = 0; end setup cost = 1
 n = length(prod_start);
 D = [0:2^n-1]';
 B = rem(floor(D*pow2(-(n-2):0)),2);
-alpha_perm = [ones(length(B)/2,1) B(1:length(B)/2,:)];
+alpha_perm = [ones(length(B)/2,1) B(1:length(B)/2,:)]
 % alpha = alpha_perm(2,:)
-
+%%
 %%% compute batch size Q for alpha
 % [P_bar_j,Q_j] = prod_cum(D_j,alpha);
 
@@ -109,9 +116,10 @@ figure()
 scatter(x,y)
 xlabel('# of Setups');
 ylabel('Time-weighted Inventory');
+%%
 % compute TC cost = Kx + hy
-TC = K*x + h*y;
-
+TC = K*x + h*y
+%%
 %%% compute NPV cost
 K_cost = [];
 h_cost = [];
@@ -127,13 +135,32 @@ dcvr = sum(dcvr);
 h_cost = h_cost-dcvr;
 
 NPV = h_cost + K_cost;
+NPV = NPV'
+%%
 
 %%% find alpha minimizing NPV cost
 [min_npv,min_ind] = min(NPV);
 result = ['Alpha that minimizes NPV cost: ',num2str(alpha_perm(min_ind,:))];
 disp(result)
 
-
-
-
+%%% plot production curve for given alpha
+alpha_plot = alpha_perm(min_ind,:);
+% alpha_plot = [1 0 0 0 0];
+[P_bar_j,Q_j] = prod_cum(D_j,alpha_plot);
+alpha_ind = find(alpha_plot);
+str_prod = prod_start;
+str_prod = str_prod(alpha_ind);
+end_prod = P_bar_j;
+end_prod = end_prod(alpha_ind);
+str_time = (t_j-D_j/q);
+str_time = str_time(alpha_ind);
+end_time = str_time + (end_prod-str_prod)/q;
+prod_t = sort([0 str_time end_time t_j(end)]);
+prod_y = sort([0 str_prod end_prod D_bar_j(end)]);
+figure()
+stairs([0 t t(end)+1],[0 demand_cum demand_cum(end)])
+xlabel('Time');
+ylabel('Product Quantity');
+hold on
+plot(prod_t,prod_y,'k')
 
