@@ -15,6 +15,8 @@ demand_cum = cumsum(demand);
 
 %%% plot cumulative demand
 stairs([0 t t(end)+1],[0 demand_cum demand_cum(end)])
+xlabel('Time');
+ylabel('Demand');
 hold on
 
 %%% set production rate
@@ -105,6 +107,8 @@ x = x';
 % plot the scatter plot for inventory cost vs # setup
 figure()
 scatter(x,y)
+xlabel('# of Setups');
+ylabel('Time-weighted Inventory');
 % compute TC cost = Kx + hy
 TC = K*x + h*y;
 
