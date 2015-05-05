@@ -79,7 +79,8 @@ stairs([0 t_c t_c(end)+1],[0 D_bar_j D_bar_j(end)],'k-.')
 %%% Specify Inputs
 K = 36; % Setup-Cost
 c = 10; % Unit Production Cost
-rho = 0.1; % Interest Rate
+rho = .1; % Interest Rate
+% rho = .5;
 h = c*rho; % Inventory Holding Cost
 beta = 1; % begin setup cost = 0; end setup cost = 1
 
@@ -87,9 +88,9 @@ beta = 1; % begin setup cost = 0; end setup cost = 1
 n = length(prod_start);
 D = [0:2^n-1]';
 B = rem(floor(D*pow2(-(n-2):0)),2);
-alpha_perm = [ones(length(B)/2,1) B(1:length(B)/2,:)]
+alpha_perm = [ones(length(B)/2,1) B(1:length(B)/2,:)];
 % alpha = alpha_perm(2,:)
-%%
+
 %%% compute batch size Q for alpha
 % [P_bar_j,Q_j] = prod_cum(D_j,alpha);
 
@@ -120,6 +121,11 @@ ylabel('Time-weighted Inventory');
 % compute TC cost = Kx + hy
 TC = K*x + h*y
 %%
+%%% find alpha minimizing AC cost
+[min_TC,min_TC_ind] = min(TC);
+result = ['Alpha that minimizes TC cost: ',num2str(alpha_perm(min_TC_ind,:))];
+disp(result)
+%%
 %%% compute NPV cost
 K_cost = [];
 h_cost = [];
@@ -137,14 +143,14 @@ h_cost = h_cost-dcvr;
 NPV = h_cost + K_cost;
 NPV = NPV'
 %%
-
 %%% find alpha minimizing NPV cost
-[min_npv,min_ind] = min(NPV);
-result = ['Alpha that minimizes NPV cost: ',num2str(alpha_perm(min_ind,:))];
+[min_npv,min_NPV_ind] = min(NPV);
+result = ['Alpha that minimizes NPV cost: ',num2str(alpha_perm(min_NPV_ind,:))];
 disp(result)
-
+%%
 %%% plot production curve for given alpha
-alpha_plot = alpha_perm(min_ind,:);
+alpha_plot = alpha_perm(min_NPV_ind,:);
+% alpha_plot = alpha_perm(min_TC_ind,:);
 % alpha_plot = [1 0 0 0 0];
 [P_bar_j,Q_j] = prod_cum(D_j,alpha_plot);
 alpha_ind = find(alpha_plot);
@@ -163,4 +169,6 @@ xlabel('Time');
 ylabel('Product Quantity');
 hold on
 plot(prod_t,prod_y,'k')
+
+
 
